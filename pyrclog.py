@@ -4,9 +4,9 @@ from datetime import datetime
 import os
 import sys
  
-server = 'hubbard.freenode.net'
-port = 6665 
-channels = ['#pybot', '#pybot1', '#pybot3'] 
+server = 'irchost'
+port = 6667 
+channels = ['#test1', '#test2', '#test3'] 
 botnick = 'pyrclog' 
 now = datetime.now()
 hrse = str(now.hour) + ':' + str(now.second)
