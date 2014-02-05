@@ -3,11 +3,13 @@ import socket
 from datetime import datetime
  
 server = 'hubbard.freenode.net'
-port = 6665 #default
-channels = ['#pybot', '#pybot1', '#pybot3'] #channels you want to join (Please Change)
-botnick = 'pyrclog' #nickname for bot
+port = 6665 
+channels = ['#pybot', '#pybot1', '#pybot3'] 
+botnick = 'pyrclog' 
 now = datetime.now()
 hrse = str(now.hour) + ':' + str(now.second)
+file_name = str(now.month) + "-" + str(now.day) + '-' + str(now.year) + '.' + 'log'
+logbase = '/home/Derek/Projects/pyrclog/logs/'
 
 ircsoc = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 ircsoc.connect(( server, port))
@@ -24,6 +26,8 @@ while True:
         nick=ircmsg.split('!')[0][1:]
         channel=ircmsg.split(' PRIVMSG' )[-1].split(' :')[0]
         msg=ircmsg.split('PRIVMSG')[-1].split(' :')[1]
-        print '[%s]%s <%s>: %s' % (hrse,channel, nick, msg)
+        with open(logcation, 'a') as logfile:
+            logfile.write('[%s]%s <%s>: %s\n' % (hrse,channel,nick,msg))
+        #print '[%s]%s <%s>: %s' % (hrse,channel, nick, msg)
     if ircmsg.find( 'PING' ) != -1:
         ircsoc.send('PONG' + ircmsg.split() [1] + '\r\n')
