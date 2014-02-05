@@ -1,6 +1,8 @@
 #!/usr/bin/pyhon
 import socket
 from datetime import datetime
+import os
+import sys
  
 server = 'hubbard.freenode.net'
 port = 6665 
@@ -10,6 +12,14 @@ now = datetime.now()
 hrse = str(now.hour) + ':' + str(now.second)
 file_name = str(now.month) + "-" + str(now.day) + '-' + str(now.year) + '.' + 'log'
 logbase = '/home/Derek/Projects/pyrclog/logs/'
+
+def startup():
+    for channel in channels:
+        channel = channel.split('#')[1]
+    if os.path.isdir(logbase + channel):
+        continue
+    else:
+        sys.exit('Please create a valid directory for the channel you are trying to join')
 
 ircsoc = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 ircsoc.connect(( server, port))
