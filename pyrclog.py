@@ -9,10 +9,10 @@ import time
 server = 'irchost'
 port = 6667
 channels = ['#test1', '#test2', '#test3']
-botnick = 'OPS_py_logtest'
+
 #formatting stuff
 now = datetime.now()
-logbase = '/home/tpf816/dcops/irclogs/test/'
+logbase = '/some/log/dir/for/base'
 
 def filename():
     return str(datetime.now().month) + '-' + str(datetime.now().day) + '-' + str(datetime.now().year) + '.' + 'log'
@@ -34,7 +34,7 @@ startup()
 ircsoc = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 ircsoc.connect(( server, port))
 time.sleep(1)
-ircsoc.send('NICK OPS_pyrc_logtest\r\n' )
+ircsoc.send('NICK pyrclog\r\n' )
 time.sleep(1)
 ircsoc.send('USER pyrclog pyrclog pyrclog :Python IRClogger Maintained by Derek McKnight\r\n' )
 time.sleep(1)
