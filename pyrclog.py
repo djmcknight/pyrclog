@@ -29,11 +29,11 @@ def startup():
     try:
         for channel in channels:
             channel = channel.split('#')[1]
-            os.listdir(logbase + channel)
-    except OSError:
-        return False
-        sys.exit()
-    return True
+            os.listdir(logbase + channel) #Tries to list dir
+    except OSError: #If it can't use the OSError it rasies
+        return False #and return false
+        sys.exit() #then exit
+    return True #IF it works - return true.
 startup() #calls Startup to check the channels log dir
 
 #opens the socket
@@ -43,26 +43,28 @@ ircsoc.connect(( server, port))
 #sleep for one second
 time.sleep(1)
 ircsoc.send('NICK pyrclog\r\n' )
-time.sleep(1)
+time.sleep(1) #More Sleep
 ircsoc.send('USER pyrclog pyrclog pyrclog :Python IRClogger Maintained by Derek McKnight\r\n' )
-time.sleep(1)
+time.sleep(1) #bot is sleepy
 
 #Chceks to see if startup function is true. This is an infinite loop
 while startup():
     for channel in channels:
-        ircsoc.send('JOIN %s\r\n' % channel) #Joins the channels
+        ircsoc.send('JOIN %s\r\n' % channel) #Joins the channles in 'channels'
     ircmsg = ircsoc.recv(2048)
     ircmsg=ircmsg.strip('\n\r')
     if ircmsg.find('PRIVMSG') != -1: #If Statement to look for messages from users in IRC channels
-        nick=ircmsg.split('!')[0][1:]                        #Message formatting
-        channel=ircmsg.split(' PRIVMSG' )[-1].split(' :')[0] #More message formatting
-        new_channel=channel.split('#')[1]                    #Even more message formatting
-        msg=ircmsg.split('PRIVMSG')[-1].split(' :')[1]       #Lots mor message formatting
-        #The 'with open' opens the new file with the current date, as seen in the filename function - this creates the
-        #log rotation ability because this will only write to files of the current date - when it becomes a new day
-        #you get a new file. This also makes sure that you don't have to explicitly close the file after each call.
-        with open(logbase + new_channel + '/' + filename() , 'a') as logfile:
-            logfile.write('[%s]%s <%s>: %s\n' % (timeformat(),channel,nick,msg))
+        nick=ircmsg.split('!')[0][1:]                         #Message formatting
+        channel=ircmsg.split(' PRIVMSG' )[-1].split(' :')[0]  #More message formatting
+        if channel.startswith(' #'): #Makes it so people how private message the bot don't crash it.
+            new_channel=channel.split('#')[1]                 #Even more message formatting
+            msg=ircmsg.split('PRIVMSG')[-1].split(' :')[1]    #Lots mor message formatting
+            #The 'with open' opens the new file with the current date, as seen in the filename function - this creates the
+            #log rotation ability because this will only write to files of the current date - when it becomes a new day
+            #you get a new file. This also makes sure that you don't have to explicitly close the file after each call.
+            with open(logbase + new_channel + '/' + filename() , 'a') as logfile:
+                logfile.write('[%s]%s <%s>: %s\n' % (timeformat(),channel,nick,msg))
+        
     #Responds to the IRC PING responses. If you don't aswer the PING with PONG and the numeral in the PING request
     #you will eventually be timed out of the server
     if ircmsg.find( 'PING' ) != -1:
