@@ -30,7 +30,7 @@ def startup():
         for channel in channels:
             channel = channel.split('#')[1]
             os.listdir(logbase + channel) #Tries to list dir
-    except OSError: #If it can't use the OSError it rasies
+    except OSError: #If it can't, use the OSError it rasies
         return False #and return false
         sys.exit() #then exit
     return True #IF it works - return true.
@@ -40,8 +40,7 @@ startup() #calls Startup to check the channels log dir
 ircsoc = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 #connnects to irc server asiged to 'server', and 'port'
 ircsoc.connect(( server, port))
-#sleep for one second
-time.sleep(1)
+time.sleep(1) #sleep for one second
 ircsoc.send('NICK pyrclog\r\n' )
 time.sleep(1) #More Sleep
 ircsoc.send('USER pyrclog pyrclog pyrclog :Python IRClogger Maintained by Derek McKnight\r\n' )
