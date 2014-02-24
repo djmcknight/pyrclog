@@ -64,7 +64,7 @@ time.sleep(1)
 while startup():
     for channel in channels:
         ircsoc.send('JOIN %s\r\n' % channel) 
-    ircmsg = ircsoc.recv(2048)
+    ircmsg = ircsoc.recv(8196)
     ircmsg=ircmsg.strip('\n\r')
     if ircmsg.find('PRIVMSG') != -1: 
         nick=ircmsg.split('!')[0][1:]                         
