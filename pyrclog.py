@@ -23,7 +23,7 @@ nick = 'pyrclog'
 
 
 
-now = datetime.now()
+
 logbase = '/home/pyrclog/logs/'
 
 
