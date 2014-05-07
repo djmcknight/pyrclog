@@ -60,8 +60,9 @@ time.sleep(1)
 ircsoc.send('USER pyrclog pyrclog pyrclog :Python IRClogger Maintained by Derek McKnight\r\n' )
 time.sleep(1) 
 
-chan_num = 0
-main():
+
+def main():
+    chan_num = 0
     while startup():
         ircmsg = ircsoc.recv(8192)
         ircmsg=ircmsg.strip('\r\n')
