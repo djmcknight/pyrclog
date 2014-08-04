@@ -15,7 +15,7 @@ else: #writing to pid to the file called "pyrclog.pid"
     with open(pidfile,'w') as pid_file:
         pid_file.write(pid)
 
-#connects to your server
+#server information - like name of the irc server and the port you're going to be using.
 server = 'irchost'
 port = 6667
 channels = ['#test1', '#test2', '#test3'] #list of channels
