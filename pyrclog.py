@@ -5,94 +5,92 @@ import os
 import sys
 import time
 
-#Creates the .pid file on the server. If the file exists already - exit the script.
+#pid file info
 pid = str(os.getpid())
 pidfile = '/tmp/pyrclog.pid'
 if os.path.isfile(pidfile):
     print '%s already exsists, exiting' % pidfile
     sys.exit()
-else: #writing to pid to the file called "pyrclog.pid"
+else:
     with open(pidfile,'w') as pid_file:
         pid_file.write(pid)
 
-#server information - like name of the irc server and the port you're going to be using.
+#connection info
 server = 'irchost'
 port = 6667
-channels = ['#test1', '#test2', '#test3'] #list of channels
-nick = 'pyrclog' #The 'nickname' on the IRC server (what everyone sees you as
+channels = ['#test1', '#test2', '#test3']
+nick = 'pyrclogger'
 
 
+#formatting stuff
+now = datetime.now()
+logbase = '/elsnfs/irclogs/'
 
-#This is the logbase. This is needed for writing the logs to the files.
-logbase = '/home/pyrclog/logs/'
-
-#This creates the file name - and creates the native log rotation. Since it's going to call this every time it tries to write
-#When it becomes a new day - it creates a new file (move on this below)
+#Function for returning datetime month-day-year.log for the filename of the logfile - this creates the Logrotation becuase
+#when it's a new day - it will automatially write to this new file.
 def filename():
-    return str(datetime.now().month) + '-' + str(datetime.now().day) + '-' + str(datetime.now().year) + '.' + 'txt'
-
-#time formating for when the script writes inside the log file.
+#    return str(datetime.now().month) + '-' + str(datetime.now().day) + '-' + str(datetime.now().year) + '.' + 'txt'
+    dtn  = datetime.now()
+    nfn = dtn.strftime('%Y-%m-%d.txt')
+    return nfn
+#Time format for when we receive an alert in [hour:minute] format
 def timeformat():
     tf = datetime.now()
     toutput = tf.strftime('%H:%M')
     return toutput
-    
+    #return str(datetime.now().hour) + ':' + str(datetime.now().minute)
 
-#This startup function tries to list the director logbase(as seen above) + channel. So if /home/pyrclog/logs/test1 is not
-#a valid directory - the script will exit.
+#You need to have the logbase + dir of the channel you're going to be watching for. So - if you need to add a new
+#channel to watching in 'channels' - you need to mkdir new channel in the logbase dir.
 def startup():
     try:
         for channel in channels:
             channel = channel.split('#')[1]
-            os.listdir(logbase + channel) 
-    except OSError: #excepting the OSError for invalid dir
-        return False 
-        sys.exit() #exit the script
-    return True #Return true if the logbase + channel is a valid directory
-startup() 
+            os.listdir(logbase + channel) #Tries to list dir
+    except OSError: #If it can't use the OSError it rasies
+        return False #and return false
+        sys.exit() #then exit
+    return True #IF it works - return true.
+startup() #calls Startup to check the channels log dir
 
-#Setting up the socet.
+#opens the socket
 ircsoc = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
-#connecting to the socket
+#connnects to irc server asiged to 'server', and 'port'
 ircsoc.connect(( server, port))
-
-time.sleep(1) #sleep 1 second
+#sleep for one second
+time.sleep(1)
 ircsoc.send('NICK %s\r\n' % nick )
-time.sleep(1) #sleep 1 second
-ircsoc.send('USER pyrclog pyrclog pyrclog :Python IRClogger Maintained by Derek McKnight\r\n' )
-time.sleep(1) #sleep 1 second.
+time.sleep(1) #More Sleep
+ircsoc.send('USER DerekM DerekM DerekM :Python IRClogger\r\n' )
+time.sleep(1) #bot is sleepy
 
-#The "main" loop. This is called if the python script ran - not imported.
 def main():
     chan_num = 0
-    while startup(): #Checks to see if startup(): is true. This creates an infinite loop.
-        ircmsg = ircsoc.recv(8192) #Recieve datat from socket
+    while startup():
+        ircmsg = ircsoc.recv(8192)
         ircmsg=ircmsg.strip('\r\n')
-        #Below looks for the first inital PING message from the irc server. you HAVE to answer this first before
-        #the irc server will accept any commands from you.
-        if ircmsg.find( 'PING' ) != -1: 
+        #responsed to the IRC Serv PING messages.
+        if ircmsg.find( 'PING' ) != -1:
             ircsoc.send('PONG ' + ircmsg.split()[1] + '\r\n')
-        #Joins the channels one at a time
+        #joins the channels, but only once. This is a test to see if try and stop the excess flood
+        #messages durkin was seeing on his bot
         while chan_num != len(channels):
             for channel in channels:
-                ircsoc.send('JOIN %s\r\n' % channel) 
+                ircsoc.send('JOIN %s\r\n' % channel) #Joins the channles in 'channels'
                 chan_num += 1
-        # Looks for messages in the data you recieved from  the sockets that are from other people.
-        if ircmsg.find('PRIVMSG') != -1: 
-            nick=ircmsg.split('!')[0][1:]                         
-            channel=ircmsg.split(' PRIVMSG' )[-1].split(' :')[0]  
-            if channel.startswith(' #'): #This is so if someone PM's the bot - it doesn't crash it.
-                new_channel=channel.split('#')[1] #message formatting.            
-                msg=ircmsg.split('PRIVMSG')[-1].split(' :')[1]    
-                # The with open(file) is so you don't have to specifically close the file every time you write - becuase
-                # "with open" does this after it's dones writing to the file.
+                time.sleep(30)
+        if ircmsg.find('PRIVMSG') != -1: #If Statement to look for messages from users in IRC channels
+            nick=ircmsg.split('!')[0][1:]                         #Message formatting
+            channel=ircmsg.split(' PRIVMSG' )[-1].split(' :')[0]  #More message formatting
+            if channel.startswith(' #'): #Makes it so people how private message the bot don't crash it.
+                new_channel=channel.split('#')[1]                 #Even more message formatting
+                msg=ircmsg.split('PRIVMSG')[-1].split(' :')[1]    #Lots mor message formatting
+                #The 'with open' opens the new file with the current date, as seen in the filename function - this creates the
+                #log rotation ability because this will only write to files of the current date - when it becomes a new day
+                #you get a new file. This also makes sure that you don't have to explicitly close the file after each call.
                 with open(logbase + new_channel + '/' + filename() , 'a') as logfile:
-                    logfile.write('[%s]%s <%s>: %s\n' % (timeformat(),channel,nick,msg))
-                    #The above only writes to a file that's today's take - for example 8-1-2014.txt - So when it's a new day
-                    #you get a new file - automatic log rotation.
+                    logfile.write('%s[%s] <%s>: %s\n' % (channel,timeformat(),nick,msg))
 
-#The 'python boiler plate'. Makes it so that the main() function only gets called when you run the script from CLI
-#and not if the file is impoorted into another python script.
+#The "Python Boilerplate - this calls the main() function above ONLY if you're executing the script, not importing it into another python script
 if __name__ == '__main__':
     main()
-
