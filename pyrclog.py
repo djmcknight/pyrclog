@@ -24,7 +24,7 @@ nick = 'pyrclogger'
 
 #formatting stuff
 now = datetime.now()
-logbase = '/elsnfs/irclogs/'
+logbase = '/home/pyrclog/logs/'
 
 #Function for returning datetime month-day-year.log for the filename of the logfile - this creates the Logrotation becuase
 #when it's a new day - it will automatially write to this new file.
